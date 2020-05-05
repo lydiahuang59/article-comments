@@ -1,0 +1,75 @@
+{% extends 'base.html' %} {% block content %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
+
+<script type="text/javascript">
+  $(document).ready(function() {
+    $('.replybutton').click(function(){
+      $(this).next('.reply').show();
+    });
+  });
+</script> 
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-8 card mb-4  mt-3 left  top">
+      <div class="card-body">
+        <h1>{% block title %} {{ article.title }} {% endblock title %}</h1>
+        <p class=" text-muted">{{ article.author }} | {{ article.created_on }}</p>
+        <p class="card-text ">{{ article.content | safe }}</p>
+
+        <h2>Add a new comment</h2>
+        <form action="." method="post">
+          {{ comment_form.as_p }}
+          {% csrf_token %}
+          <button type="submit">Add comment</button>
+        </form>
+
+        <!-- Comment with nested comments -->
+        {% for comment in comments %}
+        <div class="card mb-4">          
+          <div class="card-body">
+              <p class="card-text text-muted h6">{{ comment.author }} | {{ comment.created_on}} | Score: {{comment.score}}</h2>
+              <p class="card-text">{{comment.content | linebreaks}}</p>
+              <div class="btn-toolbar" style="margin-bottom:10px">
+                <button type="button" class="replybutton btn btn-outline-primary">
+                  Reply
+                </button>
+                <a href="{% url 'commentary:comment_upvote' article_id=article.id comment_id=comment.id  %}" class="btn btn-outline-primary">Upvote</a>
+                <a href="{% url 'commentary:comment_downvote' article_id=article.id comment_id=comment.id  %}" class="btn btn-outline-primary">Downvote</a>
+              </div>
+              <div class = "reply" style = "display:none">
+                <form action="." method="post">
+                  {{ comment_form.as_p }}
+                  {% csrf_token %}
+                  <!-- Hidden input for parent comment.id -->
+                  <input type="hidden" name="parent_id" value="{{ comment.id }}">
+                  <input class="btn btn-primary" type="submit" value="Submit">
+                </form>
+              </div>
+              <ul class="list-group"></ul>
+              {% for reply in comment.replies.all %}
+                  <li class="list-group-item">
+                    <div class="d-flex w-100 justify-content-between">
+                      <p class="card-text text-muted h6">{{ reply.author }} | {{ reply.created_on }} | Score: {{reply.score}}</h2>
+                    </div>
+                    <p class="mb-1">{{ reply.content }}</p>
+                    <div class="btn-toolbar" style="margin-bottom:10px">
+                      <a href="{% url 'commentary:comment_upvote' article_id=article.id comment_id=comment.id  %}" class="btn btn-outline-primary">Upvote</a>
+                      <a href="{% url 'commentary:comment_downvote' article_id=article.id comment_id=comment.id  %}" class="btn btn-outline-primary">Downvote</a>
+                    </div>
+                  </li>
+              {% endfor %}
+              </ul>
+          </div>
+          
+        </div>
+        {% empty %}
+          <h4>There are no comments yet.</h4>
+        {% endfor %}
+
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock content %}
