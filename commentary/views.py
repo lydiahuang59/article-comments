@@ -3,6 +3,10 @@ from .models import Article, Comment, CommentForm
 from django.shortcuts import get_object_or_404, render
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+import logging
+from vote.managers import VotableManager
+
+logger = logging.getLogger("django")
 
 class ArticleList(generic.ListView):
     queryset = Article.objects.filter(status=1).order_by('-created_on')
@@ -52,23 +56,14 @@ def detail(request, article_id):
 
 def upvote(request, article_id, comment_id):
     comment = get_object_or_404(Comment, pk=comment_id)
-    if not comment.votes.exists(request.user.id):
-        comment.votes.up(request.user.id)
+    logger.info(str(comment.votes.exists(request.user.id)))
+    logger.info(str(comment_id))
+    logger.info(str(comment.score))
+    if comment.votes.up(request.user.id):
         comment.score += 1
         comment.save()
         return HttpResponseRedirect(reverse('commentary:article_detail', args=(article_id,)))
-    else:
-        return reload_article(request, article_id)
-
-def downvote(request, article_id, comment_id):
-    comment = get_object_or_404(Comment, pk=comment_id)
-    if not comment.votes.exists(request.user.id):
-        comment.votes.down(request.user.id)
-        comment.score -= 1
-        comment.save()
-        return HttpResponseRedirect(reverse('commentary:article_detail', args=(article_id,)))
-    else:
-        return reload_article(request, article_id)
-
+    return reload_article(request, article_id)
+        
 
 
