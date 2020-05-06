@@ -9,25 +9,52 @@
   });
 </script> 
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-8 card mb-4  mt-3 left  top">
-      <div class="card-body">
-        <h1>{% block title %} {{ article.title }} {% endblock title %}</h1>
-        <p class=" text-muted">{{ article.author }} | {{ article.created_on }}</p>
-        <p class="card-text ">{{ article.content | safe }}</p>
+<style>
+html,
+body {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.container-fluid {
+  flex-grow: 1;
+  overflow: auto;
+  display: flex;
+  flex-direction: row;
+  width: 100%;
+}
+.column {
+  width: 50%;
+  flex: 1;
+  overflow: auto;
+}
+</style>
 
-        <h2>Add a new comment</h2>
-        <form action="." method="post">
-          {{ comment_form.as_p }}
-          {% csrf_token %}
-          <button type="submit">Add comment</button>
-        </form>
 
-        <!-- Comment with nested comments -->
-        {% for comment in comments %}
-        <div class="card mb-4">          
-          <div class="card-body">
+<div class="container-fluid">
+    <div class="column">
+      <div class="w-100 card">
+        <div class="card-body">
+          <h1>{% block title %} {{ article.title }} {% endblock title %}</h1>
+          <p class=" text-muted">{{ article.author }} | {{ article.created_on }}</p>
+          <p class="card-text ">{{ article.content | safe | linebreaks}}</p>
+
+          <h2>Add a new comment</h2>
+          <form action="." method="post">
+            {{ comment_form.as_p }}
+            {% csrf_token %}
+            <button type="submit">Add comment</button>
+          </form>
+        </div>
+      </div>
+    </div>
+    <div class="column">
+      <div class="w-100 card">
+        <div class="card-body">
+          <!-- Comment with nested comments -->
+          {% for comment in comments %}
+          <div class="card mb-4">          
+            <div class="card-body">
               <p class="card-text text-muted h6">{{ comment.author }} | {{ comment.created_on}} | Likes: {{comment.score}}</h2>
               <p class="card-text">{{comment.content | linebreaks}}</p>
               <button type="button" class="replybutton btn btn-outline-primary" style="margin-bottom:15px">
@@ -53,16 +80,18 @@
                   </li>
               {% endfor %}
               </ul>
-          </div>
+            </div>
           
-        </div>
-        {% empty %}
-          <h4>There are no comments yet.</h4>
-        {% endfor %}
+          </div>
+          {% empty %}
+            <h4>There are no comments yet.</h4>
+          {% endfor %}
 
+        </div>
       </div>
     </div>
-  </div>
+
 </div>
+
 
 {% endblock content %}
