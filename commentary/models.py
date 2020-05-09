@@ -45,9 +45,3 @@ class Comment(VoteModel, models.Model):
 
     def __str__(self):
         return self.content
-
-class CommentForm(forms.ModelForm):
-    content = forms.CharField(widget=forms.Textarea(attrs={'rows':5}), label='')
-    class Meta:
-        model = Comment
-        fields = ('content',)

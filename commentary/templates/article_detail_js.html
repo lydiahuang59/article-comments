@@ -1,0 +1,22 @@
+
+<script type = "text/javascript">
+$(document).ready(function() {
+    $('.replybutton').click(function(){
+      $(this).nextAll('.replyform').toggle();
+    });
+    $('.likebutton').click(function() {
+      $.ajax({
+              type: "POST",
+              url: "{% url 'commentary:comment_upvote' %}",
+              data: {'comment_id': $(this).attr('data-commentid'), 'csrfmiddlewaretoken': '{{ csrf_token }}'},
+              dataType: "json",
+              success: (response) => {
+                $(this).prev('.like-count').text("Likes: " + response.likes);
+              },
+              error: function(rs, e) {
+                alert(rs.responseText);
+              }
+        }); 
+    });
+  });
+  </script>

@@ -5,5 +5,5 @@ app_name = 'commentary'
 urlpatterns = [
     path('', views.ArticleList.as_view(), name='index'),
     path('<int:article_id>/', views.detail, name='article_detail'),
-    path('<int:article_id>/upvote/<int:comment_id>/', views.upvote, name='comment_upvote'),
+    path('upvote/', views.upvote, name='comment_upvote'),
 ]

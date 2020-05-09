@@ -1,10 +1,13 @@
 from django.views import generic
-from .models import Article, Comment, CommentForm
+from .models import Article, Comment
+from .forms import CommentForm
 from django.shortcuts import get_object_or_404, render
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponse
 from django.urls import reverse
+import json
 import logging
-from vote.managers import VotableManager
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 logger = logging.getLogger("django")
 
@@ -54,16 +57,19 @@ def detail(request, article_id):
             return HttpResponseRedirect(reverse('commentary:article_detail', args=(article.id,)))
     return reload_article(request, article_id)
 
-def upvote(request, article_id, comment_id):
-    comment = get_object_or_404(Comment, pk=comment_id)
-    logger.info(str(comment.votes.exists(request.user.id)))
-    logger.info(str(comment_id))
-    logger.info(str(comment.score))
-    if comment.votes.up(request.user.id):
-        comment.score += 1
-        comment.save()
-        return HttpResponseRedirect(reverse('commentary:article_detail', args=(article_id,)))
-    return reload_article(request, article_id)
+@login_required
+@require_POST
+def upvote(request):
+    if request.method == 'POST':
+        comment_id = request.POST.get('comment_id', None)
+        comment = get_object_or_404(Comment, pk=comment_id)
+        logger.info("comment " + str(comment_id) + " has score " + str(comment.score))
+        if comment.votes.up(request.user.id):
+            comment.score += 1
+            comment.save()
+            logger.info("increased " + str(comment_id) + " by 1, score is now " + str(comment.score))
+    result = {'likes': comment.score}
+    return HttpResponse(json.dumps(result), content_type='application/json')
         
 
 

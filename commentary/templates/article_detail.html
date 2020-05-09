@@ -1,13 +1,7 @@
 {% extends 'base.html' %} {% block content %}
 
 <script type='text/javascript' src='https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js'></script>
-<script type="text/javascript">
-  $(document).ready(function() {
-    $('.replybutton').click(function(){
-      $(this).nextAll('.replyform').show();
-    });
-  });
-</script> 
+{% include 'article_detail_js.html' %}
 
 <style>
 html,
@@ -37,7 +31,7 @@ body {
         <div class="card-body">
           <h1>{% block title %} {{ article.title }} {% endblock title %}</h1>
           <p class=" text-muted">{{ article.author }} | {{ article.created_on }}</p>
-          <p class="card-text ">{{ article.content | safe | linebreaks}}</p>
+          <p class="card-text">{{ article.content | safe | linebreaks}}</p>
 
           <h2>Add a new comment</h2>
           <form action="." method="post">
@@ -55,14 +49,17 @@ body {
           {% for comment in comments %}
           <div class="card mb-4">          
             <div class="card-body">
-              <p class="card-text text-muted h6">{{ comment.author }} | {{ comment.created_on}} | Likes: {{comment.score}}</h2>
+              <p class="card-text text-muted h6">{{ comment.author }} | {{ comment.created_on}}</p>
               <p class="card-text">{{comment.content | linebreaks}}</p>
+              <p class="like-count card-text text-muted h6">Likes: {{comment.score}}</p>
+              <button type="button" class="likebutton btn btn-outline-primary" style="margin-bottom:15px" data-commentid = "{{comment.id}}">
+                Like
+              </button>
               <button type="button" class="replybutton btn btn-outline-primary" style="margin-bottom:15px">
                 Reply
               </button>
-              <a href="{% url 'commentary:comment_upvote' article_id=article.id comment_id=comment.id  %}" class="btn btn-outline-primary" style="margin-bottom:15px">Like</a>
-              
-              <form class = "replyform" action="." method="post" style="margin-bottom:15px; display:none">
+
+              <form class="replyform" action="." method="post" style="margin-bottom:15px; display:none">
                   {{ comment_form.as_p }}
                   {% csrf_token %}
                   <!-- Hidden input for parent comment.id -->
@@ -73,10 +70,13 @@ body {
               {% for reply in comment.replies.all %}
                   <li class="list-group-item">
                     <div class="d-flex w-100 justify-content-between">
-                      <p class="card-text text-muted h6">{{ reply.author }} | {{ reply.created_on }} | Score: {{reply.score}}</h2>
+                      <p class="card-text text-muted h6">{{ reply.author }} | {{ reply.created_on }}</h2>
                     </div>
                     <p class="mb-1">{{ reply.content }}</p>
-                    <a href="{% url 'commentary:comment_upvote' article_id=article.id comment_id=reply.id  %}" class="btn btn-outline-primary" style="margin-bottom:10px">Like</a>
+                    <p class="like-count card-text text-muted h6">Likes: {{reply.score}}</p>
+                    <button type="button" class="likebutton btn btn-outline-primary" style="margin-bottom:15px" data-commentid="{{reply.id}}">
+                      Like
+                    </button>
                   </li>
               {% endfor %}
               </ul>
